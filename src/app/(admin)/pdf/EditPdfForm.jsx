@@ -32,7 +32,7 @@ const EditPdfForm = () => {
     const fetchInvoice = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3005/api/invoice/${id}`
+          `http://185.199.53.88/api/invoice/${id}`
         );
 
         if (response.data.success && response.data.data) {
@@ -217,7 +217,7 @@ const EditPdfForm = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:3005/api/invoice/${id}`,
+        `http://185.199.53.88/api/invoice/${id}`,
         formData,
         {
           headers: {

@@ -23,7 +23,7 @@ const ViewPdf = () => {
     const fetchInvoice = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3005/api/invoice/${id}`
+          `http://185.199.53.88/api/invoice/${id}`
         );
         if (response.status === 200) {
           setInvoice(response.data.data); // Set the fetched invoice to state
@@ -42,7 +42,7 @@ const ViewPdf = () => {
   const handleGeneratePdf = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3005/api/invoice/${id}/pdf`
+        `http://185.199.53.88/api/invoice/${id}/pdf`
       );
 
       if (!response.data.success) {

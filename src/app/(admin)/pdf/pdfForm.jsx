@@ -208,7 +208,7 @@ const PdfForm = () => {
         terms: terms.filter((term) => term.trim()),
       };
 
-      const response = await fetch("http://localhost:3005/api/invoice", {
+      const response = await fetch("http://185.199.53.88/api/invoice", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

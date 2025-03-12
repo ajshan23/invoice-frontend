@@ -32,7 +32,7 @@ const AllPdfView = () => {
     const fetchPdfs = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3005/api/invoice?page=${currentPage}&limit=${limit}&search=${searchQuery}`
+          `http://185.199.53.88/api/invoice?page=${currentPage}&limit=${limit}&search=${searchQuery}`
         );
         if (response.status === 200) {
           setPdfs(response.data.data); // Set the fetched PDFs to state
@@ -65,7 +65,7 @@ const AllPdfView = () => {
     setLoading(true); // Start loading
     try {
       const response = await axios.delete(
-        `http://localhost:3005/api/invoice/${invoiceToDelete}`
+        `http://185.199.53.88/api/invoice/${invoiceToDelete}`
       );
       if (response.status === 200) {
         // Remove the deleted invoice from the state

@@ -4,7 +4,7 @@ function Pdf() {
   // Function to handle the button click and generate the PDF
   const handleGeneratePdf = async () => {
     try {
-      const response = await fetch('http://localhost:3005/api/user/generate-pdf', {
+      const response = await fetch('http://185.199.53.88/api/user/generate-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
