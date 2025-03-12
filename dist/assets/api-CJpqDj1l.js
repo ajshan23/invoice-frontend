@@ -1,0 +1,1 @@
+import{a}from"./index-C88pvD_q.js";const o=a.create({baseURL:"http://13.203.184.112:3000/api",headers:{"Content-Type":"application/json"}});o.interceptors.request.use(e=>{const t=localStorage.getItem("_TECHMIN_AUTH_KEY_");return t&&(e.headers.Authorization=`Bearer ${t}`),e});export{o as a};
