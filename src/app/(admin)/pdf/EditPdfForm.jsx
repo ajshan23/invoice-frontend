@@ -14,6 +14,7 @@ import "cropperjs/dist/cropper.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import PageTitle from "../../../components/PageTitle";
 
 const EditPdfForm = () => {
   const [companyName, setCompanyName] = useState("");
@@ -62,6 +63,7 @@ const EditPdfForm = () => {
     fetchInvoice();
   }, [id]);
 
+  // Add a new main item
   const addItem = () => {
     const newItem = {
       name: "",
@@ -73,6 +75,13 @@ const EditPdfForm = () => {
     setItems([...items, newItem]);
   };
 
+  // Remove a main item
+  const removeItem = (index) => {
+    const updatedItems = items.filter((_, i) => i !== index);
+    setItems(updatedItems);
+  };
+
+  // Update a main item
   const updateItem = (index, field, value) => {
     const updatedItems = [...items];
     updatedItems[index][field] = value;
@@ -85,6 +94,7 @@ const EditPdfForm = () => {
     }
   };
 
+  // Add a sub-item to a main item
   const addSubItem = (itemIndex) => {
     const updatedItems = [...items];
     updatedItems[itemIndex].subItems.push({
@@ -95,12 +105,23 @@ const EditPdfForm = () => {
     setItems(updatedItems);
   };
 
+  // Remove a sub-item from a main item
+  const removeSubItem = (itemIndex, subItemIndex) => {
+    const updatedItems = [...items];
+    updatedItems[itemIndex].subItems = updatedItems[itemIndex].subItems.filter(
+      (_, i) => i !== subItemIndex
+    );
+    setItems(updatedItems);
+  };
+
+  // Update a sub-item
   const updateSubItem = (itemIndex, subItemIndex, field, value) => {
     const updatedItems = [...items];
     updatedItems[itemIndex].subItems[subItemIndex][field] = value;
     setItems(updatedItems);
   };
 
+  // Handle image upload for a main item
   const handleImageUpload = (itemIndex, event) => {
     const file = event.target.files[0];
     if (file) {
@@ -112,12 +133,14 @@ const EditPdfForm = () => {
     }
   };
 
+  // Save cropper reference for the item
   const setCropperRef = (itemIndex, cropper) => {
     if (cropper) {
       cropperRefs.current[itemIndex] = cropper;
     }
   };
 
+  // Apply the crop
   const applyImageCrop = (itemIndex) => {
     const cropper = cropperRefs.current[itemIndex];
     if (cropper) {
@@ -136,22 +159,32 @@ const EditPdfForm = () => {
     }
   };
 
+  // Add a new term
   const addTerm = () => {
     setTerms([...terms, ""]);
   };
 
+  // Remove a term
+  const removeTerm = (index) => {
+    const updatedTerms = terms.filter((_, i) => i !== index);
+    setTerms(updatedTerms);
+  };
+
+  // Update a term
   const updateTerm = (index, value) => {
     const updatedTerms = [...terms];
     updatedTerms[index] = value;
     setTerms(updatedTerms);
   };
 
+  // Show Toast with message
   const showToastMessage = (message) => {
     setToastMessage(message);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  // Submit the form data
   const handleSubmit = async () => {
     setShowToast(false);
 
@@ -171,11 +204,6 @@ const EditPdfForm = () => {
       const item = items[i];
       if (!item.name || !item.price || !item.quantity) {
         showToastMessage("All main item fields are required.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-      if (!item.image || !croppedImages[i]) {
-        showToastMessage("Please upload and crop an image for all main items.");
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -204,7 +232,7 @@ const EditPdfForm = () => {
           name: item.name,
           price: parseFloat(item.price),
           quantity: parseInt(item.quantity),
-          image: item.image,
+          image: item.image, // Image is optional
           subItems: item.subItems.map((subItem) => ({
             name: subItem.name,
             price: parseFloat(subItem.price),
@@ -232,7 +260,7 @@ const EditPdfForm = () => {
 
       // Since the backend doesn't return a PDF anymore, we can just show success
       showToastMessage("Invoice updated successfully!");
-      navigate("/pdf"); // Adjust this route as needed
+      navigate("/invoice"); // Adjust this route as needed
     } catch (error) {
       console.error("Error updating PDF:", error);
       showToastMessage(
@@ -258,6 +286,7 @@ const EditPdfForm = () => {
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
+      <PageTitle title="Edit Invoice" />
 
       <Card>
         <CardBody>
@@ -302,6 +331,16 @@ const EditPdfForm = () => {
           {items.map((item, itemIndex) => (
             <Card key={item._id || itemIndex} className="mb-3">
               <CardBody>
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5>Main Item {itemIndex + 1}</h5>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => removeItem(itemIndex)}
+                  >
+                    Remove
+                  </Button>
+                </div>
                 <Row>
                   <Col lg={6}>
                     <FormControl
@@ -423,6 +462,15 @@ const EditPdfForm = () => {
                         className="mb-3"
                       />
                     </Col>
+                    <Col lg={12} className="d-flex justify-content-end">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => removeSubItem(itemIndex, subItemIndex)}
+                      >
+                        Remove Sub-Item
+                      </Button>
+                    </Col>
                   </Row>
                 ))}
 
@@ -450,6 +498,15 @@ const EditPdfForm = () => {
                       value={term}
                       onChange={(e) => updateTerm(index, e.target.value)}
                     />
+                  </Col>
+                  <Col lg={12} className="d-flex justify-content-end">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => removeTerm(index)}
+                    >
+                      Remove Term
+                    </Button>
                   </Col>
                 </Row>
               ))}

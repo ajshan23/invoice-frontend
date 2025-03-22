@@ -5,10 +5,17 @@ export const MENU_ITEMS = [
     isTitle: true,
   },
   {
+    key: "create",
+    icon: "ri:file-add-line",
+    label: "Create invoice",
+
+    url: "/invoice/new",
+  },
+  {
     key: "Invoices",
     icon: "ri:archive-stack-line",
     label: "Invoices",
 
-    url: "/pdf",
+    url: "/invoice",
   },
 ];

@@ -6,7 +6,7 @@ const Footer = () => {
       <Container fluid>
         <Row>
           <Col xs={12} className="text-center">
-            {currentYear} © Techmin - Theme by <b>{developedBy}</b>
+            {currentYear} © Glomium - Theme by <b>{developedBy}</b>
           </Col>
         </Row>
       </Container>

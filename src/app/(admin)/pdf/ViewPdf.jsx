@@ -76,7 +76,7 @@ const ViewPdf = () => {
 
   // Function to handle navigation to edit page
   const handleEdit = () => {
-    navigate(`/pdf/edit/${id}`); // Navigate to the edit page with the invoice ID
+    navigate(`/invoice/edit/${id}`); // Navigate to the edit page with the invoice ID
   };
 
   if (loading) {

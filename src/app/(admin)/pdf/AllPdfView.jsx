@@ -168,9 +168,9 @@ const AllPdfView = () => {
                   variant="dark"
                   style={{ padding: "10px 20px", borderRadius: 10 }}
                   as={Link}
-                  to="/pdf/new" // Link to the PDF creation page
+                  to="/invoice/new" // Link to the PDF creation page
                 >
-                  New PDF
+                  New
                 </Button>
               </Col>
             </Row>
@@ -222,7 +222,7 @@ const AllPdfView = () => {
                                 variant="info"
                                 size="sm"
                                 as={Link}
-                                to={`/pdf/view/${pdf._id}`} // Link to view PDF details
+                                to={`/invoice/view/${pdf._id}`} // Link to view PDF details
                                 style={{ marginRight: "5px", color: "white" }}
                               >
                                 View

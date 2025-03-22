@@ -141,7 +141,7 @@ const initialRoutes = [
   {
     path: "/",
     name: "root",
-    element: <Navigate to="/pdf" />,
+    element: <Navigate to="/invoice" />,
   },
 ];
 
@@ -530,22 +530,22 @@ const eventRoutes = [
 ];
 const pdfRoutes = [
   {
-    path: "/pdf/new",
+    path: "/invoice/new",
     name: "Pdf",
     element: <PdfForm />,
   },
   {
-    path: "/pdf",
+    path: "/invoice",
     name: "Pdf",
     element: <AllPdfView />,
   },
   {
-    path: "/pdf/view/:id",
+    path: "/invoice/view/:id",
     name: "Pdf",
     element: <ViewPdf />,
   },
   {
-    path: "/pdf/edit/:id",
+    path: "/invoice/edit/:id",
     name: "Pdf",
     element: <EditPdf />,
   },

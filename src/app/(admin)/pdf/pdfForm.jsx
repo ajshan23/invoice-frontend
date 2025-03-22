@@ -15,6 +15,7 @@ import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+import PageTitle from "../../../components/PageTitle";
 
 const PdfForm = () => {
   const [companyName, setCompanyName] = useState("");
@@ -41,6 +42,12 @@ const PdfForm = () => {
     setItems([...items, newItem]);
   };
 
+  // Remove a main item
+  const removeItem = (index) => {
+    const updatedItems = items.filter((_, i) => i !== index);
+    setItems(updatedItems);
+  };
+
   // Update a main item
   const updateItem = (index, field, value) => {
     const updatedItems = [...items];
@@ -62,6 +69,15 @@ const PdfForm = () => {
       price: 0,
       quantity: 1,
     });
+    setItems(updatedItems);
+  };
+
+  // Remove a sub-item from a main item
+  const removeSubItem = (itemIndex, subItemIndex) => {
+    const updatedItems = [...items];
+    updatedItems[itemIndex].subItems = updatedItems[itemIndex].subItems.filter(
+      (_, i) => i !== subItemIndex
+    );
     setItems(updatedItems);
   };
 
@@ -110,19 +126,15 @@ const PdfForm = () => {
     }
   };
 
-  // Check if all images are properly cropped
-  const allImagesProperlyCropped = () => {
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].image && !croppedImages[i]) {
-        return false;
-      }
-    }
-    return true;
-  };
-
   // Add a new term
   const addTerm = () => {
     setTerms([...terms, ""]);
+  };
+
+  // Remove a term
+  const removeTerm = (index) => {
+    const updatedTerms = terms.filter((_, i) => i !== index);
+    setTerms(updatedTerms);
   };
 
   // Update a term
@@ -164,11 +176,6 @@ const PdfForm = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
-      if (!item.image || !croppedImages[i]) {
-        showToastMessage("Please upload and crop an image for all main items.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
       for (let j = 0; j < item.subItems.length; j++) {
         const subItem = item.subItems[j];
         if (!subItem.name || !subItem.price || !subItem.quantity) {
@@ -198,7 +205,7 @@ const PdfForm = () => {
           name: item.name,
           price: parseFloat(item.price),
           quantity: parseInt(item.quantity),
-          image: item.image,
+          image: item.image, // Image is optional
           subItems: item.subItems.map((subItem) => ({
             name: subItem.name,
             price: parseFloat(subItem.price),
@@ -242,7 +249,7 @@ const PdfForm = () => {
       window.URL.revokeObjectURL(url);
 
       showToastMessage("PDF generated and downloaded successfully!");
-      navigate("/pdf");
+      navigate("/invoice");
     } catch (error) {
       console.error("Error generating PDF:", error);
       showToastMessage("Failed to generate PDF. Please try again.");
@@ -267,7 +274,7 @@ const PdfForm = () => {
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
-
+      <PageTitle title="Create Invoice" />
       <Card>
         <CardBody>
           <h4
@@ -331,7 +338,16 @@ const PdfForm = () => {
             {items.map((item, itemIndex) => (
               <Card key={itemIndex} className="mb-3">
                 <CardBody>
-                  <h5>Main Item {itemIndex + 1}</h5>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5>Main Item {itemIndex + 1}</h5>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => removeItem(itemIndex)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                   <Row>
                     <Col lg={6}>
                       <Form.Group className="mb-3">
@@ -371,7 +387,7 @@ const PdfForm = () => {
                     </Col>
                     <Col lg={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Item Image *</Form.Label>
+                        <Form.Label>Item Image (Optional)</Form.Label>
                         <FormControl
                           type="file"
                           accept="image/*"
@@ -470,6 +486,15 @@ const PdfForm = () => {
                           />
                         </Form.Group>
                       </Col>
+                      <Col lg={12} className="d-flex justify-content-end">
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => removeSubItem(itemIndex, subItemIndex)}
+                        >
+                          Remove Sub-Item
+                        </Button>
+                      </Col>
                     </Row>
                   ))}
 
@@ -500,6 +525,15 @@ const PdfForm = () => {
                           onChange={(e) => updateTerm(index, e.target.value)}
                         />
                       </Form.Group>
+                    </Col>
+                    <Col lg={12} className="d-flex justify-content-end">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => removeTerm(index)}
+                      >
+                        Remove Term
+                      </Button>
                     </Col>
                   </Row>
                 ))}
