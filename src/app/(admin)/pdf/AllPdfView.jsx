@@ -13,7 +13,7 @@ import {
   ToastContainer,
   Spinner,
 } from "react-bootstrap";
-
+import riyalIcon from "../../../assets/images/riyal_icon.png";
 const AllPdfView = () => {
   const [pdfs, setPdfs] = useState([]); // State to store PDFs
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -215,7 +215,8 @@ const AllPdfView = () => {
                               {pdf.items.length}
                             </td>
                             <td style={{ verticalAlign: "middle" }}>
-                              ${pdf.totalPrice}
+                              <img src={riyalIcon} width={10} height={12} />
+                              {pdf.totalPrice}
                             </td>
                             <td style={{ verticalAlign: "middle" }}>
                               <Button

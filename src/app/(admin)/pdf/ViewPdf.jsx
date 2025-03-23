@@ -10,7 +10,7 @@ import {
   Alert,
   Button,
 } from "react-bootstrap";
-
+import riyalIcon from "../../../assets/images/riyal_icon.png";
 const ViewPdf = () => {
   const { id } = useParams(); // Get the invoice ID from the URL
   const navigate = useNavigate(); // Hook for navigation
@@ -175,9 +175,13 @@ const ViewPdf = () => {
                         <tr>
                           <td>{item.name}</td>
                           <td className="text-center">{item.quantity}</td>
-                          <td className="text-end">${item.price}</td>
-                          <td className="text-end">
-                            ${item.quantity * item.price}
+                          <td className="text-end flex flex-row">
+                            <img src={riyalIcon} width={10} height={12} />
+                            {item.price}
+                          </td>
+                          <td className="text-end flex flex-row">
+                            <img src={riyalIcon} width={10} height={12} />
+                            {item.quantity * item.price}
                           </td>
                           <td
                             rowSpan={rowCount}
@@ -200,9 +204,13 @@ const ViewPdf = () => {
                               {subItem.name}
                             </td>
                             <td className="text-center">{subItem.quantity}</td>
-                            <td className="text-end">${subItem.price}</td>
-                            <td className="text-end">
-                              ${subItem.quantity * subItem.price}
+                            <td className="text-end flex flex-row">
+                              <img src={riyalIcon} width={10} height={12} />
+                              {subItem.price}
+                            </td>
+                            <td className="text-end flex flex-row">
+                              <img src={riyalIcon} width={10} height={12} />
+                              {subItem.quantity * subItem.price}
                             </td>
                             {/* No image cell for sub-items */}
                           </tr>
@@ -221,13 +229,19 @@ const ViewPdf = () => {
               <Card.Title>Totals</Card.Title>
               <ListGroup variant="flush">
                 <ListGroup.Item>
-                  <strong>Total Price:</strong> ${totalPrice}
+                  <strong>Total Price:</strong>{" "}
+                  <img src={riyalIcon} width={10} height={12} />
+                  {totalPrice}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <strong>VAT Amount:</strong> ${VATAmount}
+                  <strong>VAT Amount:</strong>{" "}
+                  <img src={riyalIcon} width={10} height={12} />
+                  {VATAmount}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <strong>Final Amount:</strong> ${finalAmount}
+                  <strong>Final Amount:</strong>{" "}
+                  <img src={riyalIcon} width={10} height={12} />
+                  {finalAmount}
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
