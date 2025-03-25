@@ -16,6 +16,7 @@ import "cropperjs/dist/cropper.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import PageTitle from "../../../components/PageTitle";
+import { base_url } from "../../../Constants/authConstant";
 
 const PdfForm = () => {
   const [companyName, setCompanyName] = useState("");
@@ -215,7 +216,7 @@ const PdfForm = () => {
         terms: terms.filter((term) => term.trim()),
       };
 
-      const response = await fetch("http://185.199.53.88/api/invoice", {
+      const response = await fetch(`${base_url}/invoice`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

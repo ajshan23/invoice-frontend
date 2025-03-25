@@ -15,6 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import PageTitle from "../../../components/PageTitle";
+import { base_url } from "../../../Constants/authConstant";
 
 const EditPdfForm = () => {
   const [companyName, setCompanyName] = useState("");
@@ -32,9 +33,7 @@ const EditPdfForm = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axios.get(
-          `http://185.199.53.88/api/invoice/${id}`
-        );
+        const response = await axios.get(`${base_url}/invoice/${id}`);
 
         if (response.data.success && response.data.data) {
           const invoice = response.data.data;
@@ -245,7 +244,7 @@ const EditPdfForm = () => {
       };
 
       const response = await axios.put(
-        `http://185.199.53.88/api/invoice/${id}`,
+        `http://localhost:3005/api/invoice/${id}`,
         formData,
         {
           headers: {

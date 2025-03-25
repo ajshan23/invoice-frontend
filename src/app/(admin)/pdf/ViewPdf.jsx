@@ -11,45 +11,57 @@ import {
   Button,
 } from "react-bootstrap";
 import riyalIcon from "../../../assets/images/riyal_icon.png";
-const ViewPdf = () => {
-  const { id } = useParams(); // Get the invoice ID from the URL
-  const navigate = useNavigate(); // Hook for navigation
-  const [invoice, setInvoice] = useState(null); // State to store the invoice details
-  const [loading, setLoading] = useState(true); // State to handle loading state
-  const [error, setError] = useState(""); // State to handle errors
+import { base_url } from "../../../Constants/authConstant";
 
-  // Fetch invoice details from the backend
+const ViewPdf = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [invoice, setInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axios.get(
-          `http://185.199.53.88/api/invoice/${id}`
-        );
+        console.log("Fetching invoice with ID:", id); // Debug log
+        const response = await axios.get(`${base_url}/invoice/${id}`);
+        console.log("Fetch response:", response.data); // Debug log
         if (response.status === 200) {
-          setInvoice(response.data.data); // Set the fetched invoice to state
+          setInvoice(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching invoice:", error);
         setError("Failed to fetch invoice details. Please try again.");
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
     fetchInvoice();
   }, [id]);
 
-  // Function to handle PDF generation
   const handleGeneratePdf = async () => {
+    setPdfLoading(true);
+    setError(""); // Clear previous errors
+    console.log("Starting PDF generation for invoice ID:", id); // Debug log
+
     try {
       const response = await axios.get(
-        `http://185.199.53.88/api/invoice/${id}/pdf`
+        `${base_url}/invoice/${id}/pdf`,
+        { timeout: 30000 } // Add timeout to prevent hanging
       );
+
+      console.log("PDF response:", response.data); // Debug log
 
       if (!response.data.success) {
         throw new Error(response.data.error || "Failed to generate PDF");
       }
 
       const pdfBase64 = response.data.pdf;
+      if (!pdfBase64) {
+        throw new Error("No PDF data received from server");
+      }
+
       const binaryString = atob(pdfBase64);
       const binaryArray = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) {
@@ -60,23 +72,24 @@ const ViewPdf = () => {
       const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `quotation_${invoice.invoiceNumber}.pdf`;
+      a.download = `ISC Quotation_${invoice.companyName}_${invoice.invoiceNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
-      a.remove();
+      document.body.removeChild(a); // Clean up
       window.URL.revokeObjectURL(url);
+
+      console.log("PDF download initiated successfully"); // Debug log
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      setError(
-        error.response?.data?.error ||
-          "Failed to generate PDF. Please try again."
-      );
+      console.error("PDF generation error:", error);
+      setError(error.message || "Failed to generate PDF. Please try again.");
+    } finally {
+      setPdfLoading(false);
+      console.log("PDF loading state reset"); // Debug log
     }
   };
 
-  // Function to handle navigation to edit page
   const handleEdit = () => {
-    navigate(`/invoice/edit/${id}`); // Navigate to the edit page with the invoice ID
+    navigate(`/invoice/edit/${id}`);
   };
 
   if (loading) {
@@ -86,15 +99,20 @@ const ViewPdf = () => {
           <span className="visually-hidden">Loading...</span>
         </Spinner>
       </Container>
-    ); // Show loading spinner
+    );
   }
 
-  if (error) {
+  if (error && !pdfLoading) {
     return (
       <Container className="d-flex justify-content-center align-items-center vh-100">
-        <Alert variant="danger">{error}</Alert>
+        <Alert variant="danger">
+          {error}
+          <Button variant="link" onClick={handleGeneratePdf}>
+            Retry
+          </Button>
+        </Alert>
       </Container>
-    ); // Show error message
+    );
   }
 
   if (!invoice) {
@@ -102,7 +120,7 @@ const ViewPdf = () => {
       <Container className="d-flex justify-content-center align-items-center vh-100">
         <Alert variant="warning">No invoice found.</Alert>
       </Container>
-    ); // Handle case where invoice is not found
+    );
   }
 
   const {
@@ -116,7 +134,6 @@ const ViewPdf = () => {
     finalAmount,
   } = invoice;
 
-  // Format the date
   const formattedDate = new Date(date).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -130,17 +147,38 @@ const ViewPdf = () => {
           Invoice Details
         </Card.Header>
         <Card.Body>
-          {/* Buttons for Edit and Generate PDF */}
           <div className="d-flex justify-content-end mb-4">
             <Button variant="primary" onClick={handleEdit} className="me-2">
               Edit Invoice
             </Button>
-            <Button variant="success" onClick={handleGeneratePdf}>
-              Generate PDF
+            <Button
+              variant="success"
+              onClick={handleGeneratePdf}
+              disabled={pdfLoading}
+            >
+              {pdfLoading ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />{" "}
+                  Generating PDF...
+                </>
+              ) : (
+                "Generate PDF"
+              )}
             </Button>
           </div>
 
-          {/* Company Details */}
+          {pdfLoading && (
+            <Alert variant="info" className="text-center">
+              Generating PDF, please wait...
+            </Alert>
+          )}
+
           <Card className="mb-4">
             <Card.Body>
               <Card.Title>Company: {companyName}</Card.Title>
@@ -152,7 +190,6 @@ const ViewPdf = () => {
             </Card.Body>
           </Card>
 
-          {/* Items Table */}
           <Card className="mb-4">
             <Card.Body>
               <Card.Title>Items</Card.Title>
@@ -168,10 +205,9 @@ const ViewPdf = () => {
                 </thead>
                 <tbody>
                   {items.map((item, index) => {
-                    const rowCount = 1 + item.subItems.length; // Main item + sub-items
+                    const rowCount = 1 + item.subItems.length;
                     return (
                       <React.Fragment key={index}>
-                        {/* Main Item Row */}
                         <tr>
                           <td>{item.name}</td>
                           <td className="text-center">{item.quantity}</td>
@@ -196,7 +232,6 @@ const ViewPdf = () => {
                             )}
                           </td>
                         </tr>
-                        {/* Sub-Items Rows */}
                         {item.subItems.map((subItem, subIndex) => (
                           <tr key={subItem._id}>
                             <td style={{ paddingLeft: "30px" }}>
@@ -212,7 +247,6 @@ const ViewPdf = () => {
                               <img src={riyalIcon} width={10} height={12} />
                               {subItem.quantity * subItem.price}
                             </td>
-                            {/* No image cell for sub-items */}
                           </tr>
                         ))}
                       </React.Fragment>
@@ -223,7 +257,6 @@ const ViewPdf = () => {
             </Card.Body>
           </Card>
 
-          {/* Totals */}
           <Card className="mb-4">
             <Card.Body>
               <Card.Title>Totals</Card.Title>
@@ -247,7 +280,6 @@ const ViewPdf = () => {
             </Card.Body>
           </Card>
 
-          {/* Terms and Conditions */}
           <Card>
             <Card.Body>
               <Card.Title>Terms and Conditions</Card.Title>

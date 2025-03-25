@@ -14,6 +14,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import riyalIcon from "../../../assets/images/riyal_icon.png";
+import { base_url } from "../../../Constants/authConstant";
 const AllPdfView = () => {
   const [pdfs, setPdfs] = useState([]); // State to store PDFs
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -32,7 +33,7 @@ const AllPdfView = () => {
     const fetchPdfs = async () => {
       try {
         const response = await axios.get(
-          `http://185.199.53.88/api/invoice?page=${currentPage}&limit=${limit}&search=${searchQuery}`
+          `${base_url}/invoice?page=${currentPage}&limit=${limit}&search=${searchQuery}`
         );
         if (response.status === 200) {
           setPdfs(response.data.data); // Set the fetched PDFs to state
@@ -65,7 +66,7 @@ const AllPdfView = () => {
     setLoading(true); // Start loading
     try {
       const response = await axios.delete(
-        `http://185.199.53.88/api/invoice/${invoiceToDelete}`
+        `${base_url}/invoice/${invoiceToDelete}`
       );
       if (response.status === 200) {
         // Remove the deleted invoice from the state

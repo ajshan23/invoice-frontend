@@ -1,1 +1,1 @@
-export const base_url="http://ec2-13-203-184-112.ap-south-1.compute.amazonaws.com:3000/api"
+export const base_url = "http://185.199.53.88/api";
