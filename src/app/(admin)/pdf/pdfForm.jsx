@@ -243,7 +243,7 @@ const PdfForm = () => {
       const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "quotation.pdf";
+      a.download = `ISC Quotation_${companyName}_${invoiceNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
