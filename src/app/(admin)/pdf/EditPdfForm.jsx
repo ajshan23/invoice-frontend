@@ -244,7 +244,7 @@ const EditPdfForm = () => {
       };
 
       const response = await axios.put(
-        `http://localhost:3005/api/invoice/${id}`,
+        `${base_url}/invoice/${id}`,
         formData,
         {
           headers: {
