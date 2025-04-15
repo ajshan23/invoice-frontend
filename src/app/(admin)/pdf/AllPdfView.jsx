@@ -15,7 +15,10 @@ import {
 } from "react-bootstrap";
 import riyalIcon from "../../../assets/images/riyal_icon.png";
 import { base_url } from "../../../Constants/authConstant";
+import { useAuthContext } from "../../../context/useAuthContext";
+
 const AllPdfView = () => {
+  const { user } = useAuthContext();
   const [pdfs, setPdfs] = useState([]); // State to store PDFs
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [currentPage, setCurrentPage] = useState(1); // State for current page
@@ -33,7 +36,12 @@ const AllPdfView = () => {
     const fetchPdfs = async () => {
       try {
         const response = await axios.get(
-          `${base_url}/invoice?page=${currentPage}&limit=${limit}&search=${searchQuery}`
+          `${base_url}/quotation?page=${currentPage}&limit=${limit}&search=${searchQuery}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
         );
         if (response.status === 200) {
           setPdfs(response.data.data); // Set the fetched PDFs to state
@@ -47,8 +55,11 @@ const AllPdfView = () => {
         ); // Show error toast
       }
     };
-    fetchPdfs();
-  }, [currentPage, limit, searchQuery]); // Re-fetch when currentPage, limit, or searchQuery changes
+
+    if (user) {
+      fetchPdfs();
+    }
+  }, [currentPage, limit, searchQuery, user]); // Re-fetch when currentPage, limit, or searchQuery changes
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -66,7 +77,12 @@ const AllPdfView = () => {
     setLoading(true); // Start loading
     try {
       const response = await axios.delete(
-        `${base_url}/invoice/${invoiceToDelete}`
+        `${base_url}/quotation/${invoiceToDelete}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
       );
       if (response.status === 200) {
         // Remove the deleted invoice from the state
@@ -91,7 +107,7 @@ const AllPdfView = () => {
 
   return (
     <div className="d-flex p-4">
-      <PageTitle title="All PDFs" />
+      <PageTitle title="All Quotation" />
 
       {/* Bootstrap Toast for Notifications */}
       <ToastContainer position="top-end" className="p-3">
@@ -169,7 +185,7 @@ const AllPdfView = () => {
                   variant="dark"
                   style={{ padding: "10px 20px", borderRadius: 10 }}
                   as={Link}
-                  to="/invoice/new" // Link to the PDF creation page
+                  to="/quotation/new" // Link to the PDF creation page
                 >
                   New
                 </Button>
@@ -224,7 +240,7 @@ const AllPdfView = () => {
                                 variant="info"
                                 size="sm"
                                 as={Link}
-                                to={`/invoice/view/${pdf._id}`} // Link to view PDF details
+                                to={`/quotation/view/${pdf._id}`} // Link to view PDF details
                                 style={{ marginRight: "5px", color: "white" }}
                               >
                                 View

@@ -12,10 +12,12 @@ import {
 } from "react-bootstrap";
 import riyalIcon from "../../../assets/images/riyal_icon.png";
 import { base_url } from "../../../Constants/authConstant";
+import { useAuthContext } from "../../../context/useAuthContext";
 
 const ViewPdf = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthContext(); // Get user from auth context
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,9 +26,13 @@ const ViewPdf = () => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        console.log("Fetching invoice with ID:", id); // Debug log
-        const response = await axios.get(`${base_url}/invoice/${id}`);
-        console.log("Fetch response:", response.data); // Debug log
+        console.log("Fetching invoice with ID:", id);
+        const response = await axios.get(`${base_url}/quotation/${id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`, // Add authorization header
+          },
+        });
+        console.log("Fetch response:", response.data);
         if (response.status === 200) {
           setInvoice(response.data.data);
         }
@@ -37,21 +43,27 @@ const ViewPdf = () => {
         setLoading(false);
       }
     };
-    fetchInvoice();
-  }, [id]);
+
+    if (user) {
+      // Only fetch if user is available
+      fetchInvoice();
+    }
+  }, [id, user]); // Add user to dependencies
 
   const handleGeneratePdf = async () => {
     setPdfLoading(true);
-    setError(""); // Clear previous errors
-    console.log("Starting PDF generation for invoice ID:", id); // Debug log
+    setError("");
+    console.log("Starting PDF generation for invoice ID:", id);
 
     try {
-      const response = await axios.get(
-        `${base_url}/invoice/${id}/pdf`,
-        { timeout: 30000 } // Add timeout to prevent hanging
-      );
+      const response = await axios.get(`${base_url}/quotation/${id}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`, // Add authorization header
+        },
+        timeout: 30000,
+      });
 
-      console.log("PDF response:", response.data); // Debug log
+      console.log("PDF response:", response.data);
 
       if (!response.data.success) {
         throw new Error(response.data.error || "Failed to generate PDF");
@@ -72,24 +84,24 @@ const ViewPdf = () => {
       const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ISC Quotation_${invoice.companyName}_${invoice.invoiceNumber}.pdf`;
+      a.download = `ISC Quotation_${invoice.companyName}_${invoice.quotationNumber}.pdf`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a); // Clean up
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
-      console.log("PDF download initiated successfully"); // Debug log
+      console.log("PDF download initiated successfully");
     } catch (error) {
       console.error("PDF generation error:", error);
       setError(error.message || "Failed to generate PDF. Please try again.");
     } finally {
       setPdfLoading(false);
-      console.log("PDF loading state reset"); // Debug log
+      console.log("PDF loading state reset");
     }
   };
 
   const handleEdit = () => {
-    navigate(`/invoice/edit/${id}`);
+    navigate(`/quotation/edit/${id}`);
   };
 
   if (loading) {
@@ -126,7 +138,7 @@ const ViewPdf = () => {
   const {
     companyName,
     date,
-    invoiceNumber,
+    quotationNumber,
     items,
     terms,
     totalPrice,
@@ -149,7 +161,7 @@ const ViewPdf = () => {
         <Card.Body>
           <div className="d-flex justify-content-end mb-4">
             <Button variant="primary" onClick={handleEdit} className="me-2">
-              Edit Invoice
+              Edit Quotation
             </Button>
             <Button
               variant="success"
@@ -183,7 +195,7 @@ const ViewPdf = () => {
             <Card.Body>
               <Card.Title>Company: {companyName}</Card.Title>
               <Card.Text>
-                <strong>Invoice Number:</strong> {invoiceNumber}
+                <strong>Invoice Number:</strong> {quotationNumber}
                 <br />
                 <strong>Date:</strong> {formattedDate}
               </Card.Text>

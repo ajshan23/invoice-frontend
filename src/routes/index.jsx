@@ -34,6 +34,17 @@ const EventCreate = lazy(() =>
   import("@/app/(admin)/events/Components/EventCreate")
 );
 
+//user-managment
+
+const Users = lazy(() => import("@/app/(admin)/user/UserManagementList"));
+const AddUser = lazy(() => import("@/app/(admin)/user/AddUser"));
+//delivery note
+
+const DeliveryNote = lazy(() => import("@/app/(admin)/delivery/DeliveryList"));
+const DeliveryNoteCreate = lazy(() =>
+  import("@/app/(admin)/delivery/DeliveryForm")
+);
+const ViewDelivery = lazy(() => import("@/app/(admin)/delivery/ViewDelivery"));
 //apps
 const Calendar = lazy(() => import("@/app/(admin)/apps/calendar/page"));
 const KanbanBoard = lazy(() => import("@/app/(admin)/apps/kanban/page"));
@@ -141,7 +152,7 @@ const initialRoutes = [
   {
     path: "/",
     name: "root",
-    element: <Navigate to="/invoice" />,
+    element: <Navigate to="/quotation" />,
   },
 ];
 
@@ -530,27 +541,66 @@ const eventRoutes = [
 ];
 const pdfRoutes = [
   {
-    path: "/invoice/new",
+    path: "/quotation/new",
     name: "Pdf",
     element: <PdfForm />,
   },
   {
-    path: "/invoice",
+    path: "/quotation",
     name: "Pdf",
     element: <AllPdfView />,
   },
   {
-    path: "/invoice/view/:id",
+    path: "/quotation/view/:id",
     name: "Pdf",
     element: <ViewPdf />,
   },
   {
-    path: "/invoice/edit/:id",
+    path: "/quotation/edit/:id",
     name: "Pdf",
     element: <EditPdf />,
   },
 ];
+const UserManagementRoute = [
+  {
+    path: "/users",
+    name: "Users",
+    element: <Users />,
+  },
+  {
+    path: "/users/add",
+    name: "Add user",
+    element: <AddUser />,
+  },
+  {
+    path: "/users/edit/:id",
+    name: "Edit user",
+    element: <AddUser />,
+  },
+];
 
+const deliveryNoteRoutes = [
+  {
+    path: "/delivery-note/new",
+    name: "Pdf",
+    element: <DeliveryNoteCreate />,
+  },
+  {
+    path: "/delivery-note",
+    name: "Pdf",
+    element: <DeliveryNote />,
+  },
+  {
+    path: "/delivery-note/view/:id",
+    name: "Pdf",
+    element: <ViewDelivery />,
+  },
+  {
+    path: "/delivery-note/edit/:id",
+    name: "Pdf",
+    element: <DeliveryNoteCreate />,
+  },
+];
 // auth
 const authRoutes = [
   {
@@ -620,5 +670,7 @@ export const appRoutes = [
   // ...bannerRoutes,
   // ...eventRoutes,
   ...pdfRoutes,
+  ...UserManagementRoute,
+  ...deliveryNoteRoutes,
 ];
 export const publicRoutes = [...authRoutes, ...otherPublicRoutes];

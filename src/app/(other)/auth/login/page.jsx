@@ -21,7 +21,7 @@ const Login = () => {
                     <div className="p-4 my-auto text-center">
                       <h4 className="fs-20">Sign In</h4>
                       <p className="text-muted mb-4">
-                        Enter your Iqama Number or Member ID and password to access your account.
+                        Enter your Email and password to access your account.
                       </p>
                       <LoginForm />
                     </div>

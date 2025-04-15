@@ -17,8 +17,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import PageTitle from "../../../components/PageTitle";
 import { base_url } from "../../../Constants/authConstant";
+import { useAuthContext } from "../../../context/useAuthContext";
 
 const PdfForm = () => {
+  const { user } = useAuthContext();
   const [companyName, setCompanyName] = useState("");
   const [date, setDate] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -26,7 +28,7 @@ const PdfForm = () => {
   const [terms, setTerms] = useState([""]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [loading, setLoading] = useState(false); // New loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const cropperRefs = useRef({});
   const [croppedImages, setCroppedImages] = useState({});
@@ -195,18 +197,18 @@ const PdfForm = () => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
 
     try {
       const formData = {
         companyName,
         date,
-        invoiceNumber,
+        quotationNumber: invoiceNumber,
         items: items.map((item) => ({
           name: item.name,
           price: parseFloat(item.price),
           quantity: parseInt(item.quantity),
-          image: item.image, // Image is optional
+          image: item.image,
           subItems: item.subItems.map((subItem) => ({
             name: subItem.name,
             price: parseFloat(subItem.price),
@@ -216,10 +218,11 @@ const PdfForm = () => {
         terms: terms.filter((term) => term.trim()),
       };
 
-      const response = await fetch(`${base_url}/invoice`, {
+      const response = await fetch(`${base_url}/quotation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -250,13 +253,13 @@ const PdfForm = () => {
       window.URL.revokeObjectURL(url);
 
       showToastMessage("PDF generated and downloaded successfully!");
-      navigate("/invoice");
+      navigate("/quotation");
     } catch (error) {
       console.error("Error generating PDF:", error);
       showToastMessage("Failed to generate PDF. Please try again.");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
-      setLoading(false); // Stop loading regardless of success or failure
+      setLoading(false);
     }
   };
 
@@ -275,7 +278,7 @@ const PdfForm = () => {
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
-      <PageTitle title="Create Invoice" />
+      <PageTitle title="Create Quotation" />
       <Card>
         <CardBody>
           <h4
@@ -552,7 +555,7 @@ const PdfForm = () => {
                 variant="success"
                 onClick={handleSubmit}
                 className="mt-3"
-                disabled={loading} // Disable button when loading
+                disabled={loading}
               >
                 {loading ? (
                   <>

@@ -8,6 +8,7 @@ import {
   Row,
   Toast,
   ToastContainer,
+  Spinner,
 } from "react-bootstrap";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
@@ -16,36 +17,44 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import PageTitle from "../../../components/PageTitle";
 import { base_url } from "../../../Constants/authConstant";
+import { useAuthContext } from "../../../context/useAuthContext";
 
 const EditPdfForm = () => {
+  const { user } = useAuthContext();
   const [companyName, setCompanyName] = useState("");
-  const [date, setDate] = useState(""); // Stored in YYYY-MM-DD format
+  const [date, setDate] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [items, setItems] = useState([]);
   const [terms, setTerms] = useState([""]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
   const cropperRefs = useRef({});
   const [croppedImages, setCroppedImages] = useState({});
 
+  // Fetch invoice data when component mounts
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await axios.get(`${base_url}/invoice/${id}`);
+        const response = await axios.get(`${base_url}/quotation/${id}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
 
         if (response.data.success && response.data.data) {
           const invoice = response.data.data;
           setCompanyName(invoice.companyName);
-          // Set date in YYYY-MM-DD format for the input
           const formattedDate = new Date(invoice.date)
             .toISOString()
             .split("T")[0];
           setDate(formattedDate);
-          setInvoiceNumber(invoice.invoiceNumber);
+          setInvoiceNumber(invoice.quotationNumber);
           setItems(invoice.items);
-          setTerms(invoice.terms || [""]); // Ensure terms is an array
+          setTerms(invoice.terms || [""]);
 
           const initialCropped = {};
           invoice.items.forEach((item, index) => {
@@ -56,11 +65,15 @@ const EditPdfForm = () => {
       } catch (error) {
         console.error("Error fetching invoice:", error);
         showToastMessage("Failed to load invoice data");
+      } finally {
+        setFetching(false);
       }
     };
 
-    fetchInvoice();
-  }, [id]);
+    if (user) {
+      fetchInvoice();
+    }
+  }, [id, user]);
 
   // Add a new main item
   const addItem = () => {
@@ -144,7 +157,7 @@ const EditPdfForm = () => {
     const cropper = cropperRefs.current[itemIndex];
     if (cropper) {
       const croppedCanvas = cropper.getCroppedCanvas({
-        width: 150, // Changed from 100 to 150
+        width: 150,
         height: 300,
       });
       if (croppedCanvas) {
@@ -186,31 +199,41 @@ const EditPdfForm = () => {
   // Submit the form data
   const handleSubmit = async () => {
     setShowToast(false);
+    setLoading(true);
 
+    // Form validation
     if (!companyName || !date || !invoiceNumber) {
       showToastMessage("Company Name, Date, and Invoice Number are required.");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      setLoading(false);
       return;
     }
 
     if (items.length === 0) {
       showToastMessage("At least one main item is required.");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      setLoading(false);
       return;
     }
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.name || !item.price || !item.quantity) {
-        showToastMessage("All main item fields are required.");
+        showToastMessage(
+          "All main item fields (Name, Price, Quantity) are required."
+        );
         window.scrollTo({ top: 0, behavior: "smooth" });
+        setLoading(false);
         return;
       }
       for (let j = 0; j < item.subItems.length; j++) {
         const subItem = item.subItems[j];
         if (!subItem.name || !subItem.price || !subItem.quantity) {
-          showToastMessage("All sub-item fields are required.");
+          showToastMessage(
+            "All sub-item fields (Name, Price, Quantity) are required."
+          );
           window.scrollTo({ top: 0, behavior: "smooth" });
+          setLoading(false);
           return;
         }
       }
@@ -219,19 +242,20 @@ const EditPdfForm = () => {
     if (terms.length === 0 || terms.some((term) => !term.trim())) {
       showToastMessage("At least one term is required.");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      setLoading(false);
       return;
     }
 
     try {
       const formData = {
         companyName,
-        date, // Already in YYYY-MM-DD format from input
-        invoiceNumber,
+        date,
+        quotationNumber: invoiceNumber,
         items: items.map((item) => ({
           name: item.name,
           price: parseFloat(item.price),
           quantity: parseInt(item.quantity),
-          image: item.image, // Image is optional
+          image: item.image,
           subItems: item.subItems.map((subItem) => ({
             name: subItem.name,
             price: parseFloat(subItem.price),
@@ -244,11 +268,12 @@ const EditPdfForm = () => {
       };
 
       const response = await axios.put(
-        `${base_url}/invoice/${id}`,
+        `${base_url}/quotation/${id}`,
         formData,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
@@ -257,18 +282,31 @@ const EditPdfForm = () => {
         throw new Error(response.data.error || "Failed to update invoice");
       }
 
-      // Since the backend doesn't return a PDF anymore, we can just show success
       showToastMessage("Invoice updated successfully!");
-      navigate("/invoice"); // Adjust this route as needed
+      setTimeout(() => {
+        navigate("/quotation");
+      }, 1500);
     } catch (error) {
-      console.error("Error updating PDF:", error);
+      console.error("Error updating invoice:", error);
       showToastMessage(
         error.response?.data?.error ||
           "Failed to update invoice. Please try again."
       );
       window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (fetching) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -285,11 +323,13 @@ const EditPdfForm = () => {
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
-      <PageTitle title="Edit Invoice" />
+
+      <PageTitle title="Edit Quotation" />
 
       <Card>
         <CardBody>
-          <h4>Edit Invoice</h4>
+          <h4 className="mb-4">Edit Invoice</h4>
+
           <Row>
             <Col lg={12}>
               <FormControl
@@ -298,6 +338,7 @@ const EditPdfForm = () => {
                 onChange={(e) => setCompanyName(e.target.value)}
                 className="mb-3"
               />
+
               <FormControl
                 type="date"
                 value={date}
@@ -305,7 +346,7 @@ const EditPdfForm = () => {
                 className="mb-3"
                 required
               />
-              {/* Optional: Display formatted date if needed */}
+
               {date && (
                 <small className="text-muted mb-3 d-block">
                   Selected Date:{" "}
@@ -318,6 +359,7 @@ const EditPdfForm = () => {
                     .replace(/\//g, " / ")}
                 </small>
               )}
+
               <FormControl
                 placeholder="Invoice Number *"
                 value={invoiceNumber}
@@ -330,7 +372,7 @@ const EditPdfForm = () => {
           {items.map((item, itemIndex) => (
             <Card key={item._id || itemIndex} className="mb-3">
               <CardBody>
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5>Main Item {itemIndex + 1}</h5>
                   <Button
                     variant="danger"
@@ -340,6 +382,7 @@ const EditPdfForm = () => {
                     Remove
                   </Button>
                 </div>
+
                 <Row>
                   <Col lg={6}>
                     <FormControl
@@ -350,6 +393,7 @@ const EditPdfForm = () => {
                       }
                       className="mb-3"
                     />
+
                     <FormControl
                       type="number"
                       placeholder="Price *"
@@ -359,6 +403,7 @@ const EditPdfForm = () => {
                       }
                       className="mb-3"
                     />
+
                     <FormControl
                       type="number"
                       placeholder="Quantity *"
@@ -369,6 +414,7 @@ const EditPdfForm = () => {
                       className="mb-3"
                     />
                   </Col>
+
                   <Col lg={6}>
                     <FormControl
                       type="file"
@@ -376,20 +422,22 @@ const EditPdfForm = () => {
                       onChange={(e) => handleImageUpload(itemIndex, e)}
                       className="mb-3"
                     />
+
                     {item.image && (
                       <>
                         <Cropper
                           src={item.image}
                           style={{ height: 200, width: "100%" }}
-                          aspectRatio={1 / 2} // Changed from 1/3 to 1/2 for 150x300
+                          aspectRatio={1 / 2}
                           guides={true}
                           viewMode={1}
-                          minCropBoxWidth={150} // Changed from 100 to 150
+                          minCropBoxWidth={150}
                           minCropBoxHeight={300}
                           onInitialized={(instance) =>
                             setCropperRef(itemIndex, instance)
                           }
                         />
+
                         <div className="mt-2 mb-2 d-flex justify-content-between align-items-center">
                           <small className="text-muted">
                             Cropping to 150x300 aspect ratio
@@ -400,6 +448,7 @@ const EditPdfForm = () => {
                             </span>
                           )}
                         </div>
+
                         <Button
                           variant="info"
                           onClick={() => applyImageCrop(itemIndex)}
@@ -429,6 +478,7 @@ const EditPdfForm = () => {
                         className="mb-3"
                       />
                     </Col>
+
                     <Col lg={4}>
                       <FormControl
                         type="number"
@@ -445,6 +495,7 @@ const EditPdfForm = () => {
                         className="mb-3"
                       />
                     </Col>
+
                     <Col lg={4}>
                       <FormControl
                         type="number"
@@ -461,6 +512,7 @@ const EditPdfForm = () => {
                         className="mb-3"
                       />
                     </Col>
+
                     <Col lg={12} className="d-flex justify-content-end">
                       <Button
                         variant="danger"
@@ -486,7 +538,8 @@ const EditPdfForm = () => {
 
           <Card className="mb-3">
             <CardBody>
-              <h5>Terms and Conditions</h5>
+              <h5 className="mb-3">Terms and Conditions</h5>
+
               {terms.map((term, index) => (
                 <Row key={index} className="mb-3">
                   <Col lg={12}>
@@ -498,7 +551,8 @@ const EditPdfForm = () => {
                       onChange={(e) => updateTerm(index, e.target.value)}
                     />
                   </Col>
-                  <Col lg={12} className="d-flex justify-content-end">
+
+                  <Col lg={12} className="d-flex justify-content-end mt-2">
                     <Button
                       variant="danger"
                       size="sm"
@@ -509,19 +563,34 @@ const EditPdfForm = () => {
                   </Col>
                 </Row>
               ))}
+
               <Button variant="secondary" onClick={addTerm} className="mt-2">
                 Add Term
               </Button>
             </CardBody>
           </Card>
 
-          <div style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-            <Button variant="primary" onClick={addItem} className="mt-3">
+          <div className="d-flex gap-3 mt-4">
+            <Button variant="primary" onClick={addItem}>
               Add Main Item
             </Button>
 
-            <Button variant="success" onClick={handleSubmit} className="mt-3">
-              Update Invoice
+            <Button variant="success" onClick={handleSubmit} disabled={loading}>
+              {loading ? (
+                <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                    className="me-2"
+                  />
+                  Updating...
+                </>
+              ) : (
+                "Update Invoice"
+              )}
             </Button>
           </div>
         </CardBody>

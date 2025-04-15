@@ -1,6 +1,6 @@
 export const MENU_ITEMS = [
   {
-    key: "Invoice",
+    key: "Quotation",
     label: "Main",
     isTitle: true,
   },
@@ -9,13 +9,27 @@ export const MENU_ITEMS = [
     icon: "ri:file-add-line",
     label: "Create Quotation",
 
-    url: "/invoice/new",
+    url: "/quotation/new",
   },
   {
     key: "Quotation",
     icon: "ri:archive-stack-line",
     label: "Quotation",
 
-    url: "/invoice",
+    url: "/quotation",
+  },
+  {
+    key: "Users",
+    icon: "ri:user-line",
+    label: "Users",
+
+    url: "/users",
+  },
+  {
+    key: "Delivery Note",
+    icon: "ri:booklet-line",
+    label: "Delivery Note",
+
+    url: "/delivery-note",
   },
 ];
