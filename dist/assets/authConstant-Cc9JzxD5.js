@@ -1,0 +1,1 @@
+import{r as x,i as c,j as m,k as $}from"./index-CQD1z6Fx.js";const d=x.forwardRef(({bsPrefix:s,variant:r,animation:a="border",size:e,as:n="div",className:o,...p},i)=>{s=c(s,"spinner");const t=`${s}-${a}`;return m.jsx(n,{ref:i,...p,className:$(o,t,e&&`${t}-${e}`,r&&`text-${r}`)})});d.displayName="Spinner";const u="https://one.igniteway.in/api";export{d as S,u as b};
