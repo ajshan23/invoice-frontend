@@ -32,4 +32,25 @@ export const MENU_ITEMS = [
 
     url: "/delivery-note",
   },
+  {
+    key: "Invoice",
+    icon: "ri:git-repository-line",
+    label: "Invoice",
+
+    // url: "/invoice",
+  },
+  {
+    key: "Payment voucher",
+    icon: "ri:currency-fill",
+    label: "Payment voucher",
+
+    // url: "/payment",
+  },
+  {
+    key: "Receipt voucher",
+    icon: "ri:refund-fill",
+    label: "Receipt voucher",
+
+    // url: "/payment",
+  },
 ];

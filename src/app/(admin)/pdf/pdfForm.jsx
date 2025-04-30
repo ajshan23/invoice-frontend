@@ -293,7 +293,7 @@ const PdfForm = () => {
               marginBottom: "20px",
             }}
           >
-            Create Invoice
+            Create Quotation
             <span
               style={{
                 content: '""',
@@ -317,7 +317,14 @@ const PdfForm = () => {
                     onChange={(e) => setCompanyName(e.target.value)}
                   />
                 </Form.Group>
-
+                <Form.Group className="mb-3">
+                  <Form.Label>Invoice Number *</Form.Label>
+                  <FormControl
+                    placeholder="Enter invoice number"
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                  />
+                </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Date *</Form.Label>
                   <FormControl
@@ -325,15 +332,6 @@ const PdfForm = () => {
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Invoice Number *</Form.Label>
-                  <FormControl
-                    placeholder="Enter invoice number"
-                    value={invoiceNumber}
-                    onChange={(e) => setInvoiceNumber(e.target.value)}
                   />
                 </Form.Group>
               </Col>
